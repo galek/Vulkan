@@ -67,7 +67,7 @@ int main()
 		return -1;
 	}
 
-	auto window = vkts::visualCreateWindow(display, VKTS_EXAMPLE_NAME, 1024, 768, VK_FALSE, VK_FALSE, VK_TRUE).lock();
+	auto window = vkts::visualCreateWindow(display, VKTS_EXAMPLE_NAME, 1024, 768, VK_FALSE, VK_TRUE, VK_FALSE).lock();
 
 	if (!window.get())
 	{

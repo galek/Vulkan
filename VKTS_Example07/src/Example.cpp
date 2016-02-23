@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const int32_t displayIndex, const int32_t windowIndex) :
-		IUpdateThread(), displayIndex(displayIndex), windowIndex(windowIndex), initialResources(nullptr), surface(nullptr), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), vertexShaderModule(nullptr), tessellationControlShaderModule(nullptr), tessellationEvaluationShaderModule(nullptr), geometryShaderModule(nullptr), fragmentShaderModule(nullptr), pipelineCache(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), pipeline(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr)
+		IUpdateThread(), displayIndex(displayIndex), windowIndex(windowIndex), camera(nullptr), inputController(nullptr), allUpdateables(), initialResources(nullptr), surface(nullptr), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), vertexShaderModule(nullptr), tessellationControlShaderModule(nullptr), tessellationEvaluationShaderModule(nullptr), geometryShaderModule(nullptr), fragmentShaderModule(nullptr), pipelineCache(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), pipeline(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr)
 {
 	for (int32_t i = 0; i < VKTS_NUMBER_BUFFERS; i++)
 	{
@@ -1181,6 +1181,26 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
+	camera = vkts::cameraCreate(glm::vec4(0.0f, 4.0f, 10.0f, 1.0f), glm::vec4(0.0f, 2.0f, 0.0f, 1.0f));
+
+	if (!camera.get())
+	{
+		return VK_FALSE;
+	}
+
+	allUpdateables.append(camera);
+
+	inputController = vkts::inputControllerCreate(updateContext, windowIndex, 0, camera);
+
+	if (!inputController.get())
+	{
+		return VK_FALSE;
+	}
+
+	allUpdateables.insert(0, inputController);
+
+	//
+
 	VkResult result;
 
 	//
@@ -1427,6 +1447,12 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 //
 VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 {
+	for (size_t i = 0; i < allUpdateables.size(); i++)
+	{
+		allUpdateables[i]->update(updateContext.getDeltaTime(), updateContext.getDeltaTicks());
+	}
+
+	//
 
 	VkResult result;
 
@@ -1445,8 +1471,18 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		projectionMatrix = vkts::perspectiveMat4(45.0f, (float) dimension.x / (float) dimension.y, 1.0f, 100.0f);
 
-		viewMatrix = vkts::lookAtMat4(0.0f, 12.0f, 16.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+		viewMatrix = camera->getViewMatrix();
 
+		glm::vec3 lightDirection = glm::mat3(viewMatrix) * glm::vec3(0.0f, 1.0f, 2.0f);
+
+		lightDirection = glm::normalize(lightDirection);
+
+		if (!fragmentUniformBuffer->upload(0, 0, lightDirection))
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload light direction.");
+
+			return VK_FALSE;
+		}
 		if (!vertexViewProjectionUniformBuffer->upload(0 * sizeof(float) * 16, 0, projectionMatrix))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not upload matrices.");

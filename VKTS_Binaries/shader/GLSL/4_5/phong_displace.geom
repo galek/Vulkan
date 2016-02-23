@@ -1,6 +1,8 @@
 #version 450 core
 
-#define VKTS_DISPLACE_FACTOR 0.5
+// See in values in Blender file.
+#define VKTS_DISPLACE_STRENGTH 1.0
+#define VKTS_DISPLACE_MIDLEVEL 0.5
 
 layout(triangles) in;
 
@@ -34,15 +36,13 @@ void main(void)
 {
     for(int i = 0; i < gl_in.length(); ++i)
     {
-        float displace = texture(u_displacementTexture, v_g_texCoord[i]).r * VKTS_DISPLACE_FACTOR;
+        float displace = texture(u_displacementTexture, v_g_texCoord[i]).r * VKTS_DISPLACE_STRENGTH - VKTS_DISPLACE_MIDLEVEL;
         
         vec4 displaceVector = vec4(0.0, displace, 0.0, 0.0);
     
         //
     
         vec4 vertex = u_bufferViewProjection.viewMatrix * u_bufferTransform.modelMatrix * (gl_in[i].gl_Position + displaceVector);
-    
-        // TODO: Recalculate tangents depending on displace.
     
         v_f_eye = -vec3(vertex);
         v_f_normal = mat3(u_bufferViewProjection.viewMatrix) * u_bufferTransform.normalMatrix * v_g_normal[i];

@@ -56,6 +56,11 @@ private:
 
 	const int32_t windowIndex;
 
+	vkts::ICameraSP camera;
+	vkts::IInputControllerSP inputController;
+
+	vkts::SmartPointerVector<vkts::IUpdateableSP> allUpdateables;
+
 	vkts::IInitialResourcesSP initialResources;
 
 	vkts::ISurfaceSP surface;
