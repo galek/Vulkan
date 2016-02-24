@@ -811,16 +811,25 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 		return VK_FALSE;
 	}
 
-	physicalDeviceCount = 1;
+	std::unique_ptr<VkPhysicalDevice[]> allPhysicalDevices = std::unique_ptr<VkPhysicalDevice[]>(new VkPhysicalDevice[physicalDeviceCount]);
 
-	result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, &physicalDevice);
+	if (!allPhysicalDevices.get())
+	{
+		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create physical devices array.");
 
-	if (result != VK_SUCCESS || physicalDeviceCount != 1)
+		return VK_FALSE;
+	}
+
+	result = vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, &allPhysicalDevices[0]);
+
+	if (result != VK_SUCCESS || physicalDeviceCount == 0)
 	{
 		vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not enumerate physical devices.");
 
 		return VK_FALSE;
 	}
+
+	physicalDevice = allPhysicalDevices[0];
 
 	if (!vkts::wsiGatherNeededDeviceExtensions(physicalDevice))
 	{

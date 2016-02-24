@@ -74,7 +74,8 @@ How to build:
 Changelog:
 ----------
 
-02/24/2016 - Fixed task infinite wait in case execution thread was faster.
+02/24/2016 - Retested for AMD, Intel and NVIDIA GPUs and removed all layer warnings.
+           - Fixed task infinite wait in case execution thread was faster.
            - Improved scene class, that only used resources can be bound.
 
 02/23/2016 - Fixed and improved the task executor engine.
