@@ -83,8 +83,6 @@ static VkBool32 texturePrepare(IImageSP& image, IDeviceMemorySP& deviceMemory, c
         return VK_FALSE;
     }
 
-    image->cmdPipelineBarrier(cmdBuffer->getCommandBuffer(), dstAccessMask, newLayout, subresourceRange);
-
     //
 
     VkMemoryRequirements memoryRequirements;
@@ -115,6 +113,8 @@ static VkBool32 texturePrepare(IImageSP& image, IDeviceMemorySP& deviceMemory, c
 
         return VK_FALSE;
     }
+
+    image->cmdPipelineBarrier(cmdBuffer->getCommandBuffer(), dstAccessMask, newLayout, subresourceRange);
 
     return VK_TRUE;
 }
@@ -226,7 +226,7 @@ ITextureSP VKTS_APIENTRY textureCreate(IImageSP& stageImage, IBufferSP& stageBuf
             stageImageCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
             stageImageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
 
-            if (!texturePrepare(stageImage, stageDeviceMemory, initialResources, cmdBuffer, stageImageCreateInfo, dstAccessMask, newLayout, subresourceRange, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
+            if (!texturePrepare(stageImage, stageDeviceMemory, initialResources, cmdBuffer, stageImageCreateInfo, dstAccessMask, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, subresourceRange, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT))
             {
                 logPrint(VKTS_LOG_ERROR, "Texture: Could not prepare staging image.");
 

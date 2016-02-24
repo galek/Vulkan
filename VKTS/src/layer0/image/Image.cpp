@@ -186,7 +186,7 @@ void Image::copyImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage
     imageMemoryBarrier.srcQueueFamilyIndex = 0;
     imageMemoryBarrier.dstQueueFamilyIndex = 0;
     imageMemoryBarrier.image = VK_NULL_HANDLE;      			// Defined later.
-    imageMemoryBarrier.subresourceRange = {(VkImageAspectFlags)(1 << imageCopy.srcSubresource.aspectMask), imageCopy.srcSubresource.mipLevel, 1, imageCopy.srcSubresource.baseArrayLayer, 1};
+    imageMemoryBarrier.subresourceRange = {imageCopy.srcSubresource.aspectMask, imageCopy.srcSubresource.mipLevel, 1, imageCopy.srcSubresource.baseArrayLayer, 1};
 
     // Prepare source image for copy.
 

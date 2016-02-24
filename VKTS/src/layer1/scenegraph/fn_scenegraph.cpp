@@ -435,7 +435,7 @@ static ITextureSP scenegraphCreateTexture(const float red, const float green, co
     IBufferSP stageBuffer;
     IImageSP stageImage;
 
-    auto texture = textureCreate(stageImage, stageBuffer, stageDeviceMemory, context->getInitialResources(), context->getCommandBuffer(), textureName, imageData, imageCreateInfo, VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags, context->getSamplerCreateInfo(), context->getImageViewCreateInfo());
+    auto texture = textureCreate(stageImage, stageBuffer, stageDeviceMemory, context->getInitialResources(), context->getCommandBuffer(), textureName, imageData, imageCreateInfo, VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags, context->getSamplerCreateInfo(), context->getImageViewCreateInfo());
 
     context->addStageImage(stageImage);
     context->addStageBuffer(stageBuffer);
@@ -620,7 +620,7 @@ static VkBool32 scenegraphLoadTextures(const char* directory, const char* filena
             IImageSP stageImage;
             IBufferSP stageBuffer;
 
-            auto texture = textureCreate(stageImage, stageBuffer, stageDeviceMemory, context->getInitialResources(), context->getCommandBuffer(), textureName, imageData, imageCreateInfo, VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags, context->getSamplerCreateInfo(), context->getImageViewCreateInfo());
+            auto texture = textureCreate(stageImage, stageBuffer, stageDeviceMemory, context->getInitialResources(), context->getCommandBuffer(), textureName, imageData, imageCreateInfo, VK_ACCESS_INPUT_ATTACHMENT_READ_BIT | VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_TRANSFER_READ_BIT, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, subresourceRange, memoryPropertyFlags, context->getSamplerCreateInfo(), context->getImageViewCreateInfo());
 
             context->addStageImage(stageImage);
             context->addStageBuffer(stageBuffer);
