@@ -127,9 +127,14 @@ void Scene::updateDescriptorSetsRecursive(const uint32_t allWriteDescriptorSetsC
     }
 }
 
-void Scene::bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline) const
+void Scene::bindDrawIndexedRecursive(const ICommandBuffersSP& cmdBuffer, const IGraphicsPipelineSP& graphicsPipeline, const uint32_t objectOffset, const uint32_t objectStep) const
 {
-    for (size_t i = 0; i < allObjects.size(); i++)
+    if (objectStep == 0)
+    {
+        return;
+    }
+
+    for (size_t i = (size_t) objectOffset; i < allObjects.size(); i += (size_t) objectStep)
     {
         allObjects[i]->bindDrawIndexedRecursive(cmdBuffer, graphicsPipeline);
     }

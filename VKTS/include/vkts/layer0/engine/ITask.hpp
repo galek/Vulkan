@@ -86,11 +86,10 @@ public:
     {
         std::unique_lock<std::mutex> taskLock(taskMutex);
 
-        do
+        while (!done)
         {
             taskConditionVariable.wait(taskLock);
         }
-        while (!done);
     }
 
     VkBool32 resetDone()

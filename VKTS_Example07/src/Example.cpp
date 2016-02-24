@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const int32_t displayIndex, const int32_t windowIndex) :
-		IUpdateThread(), displayIndex(displayIndex), windowIndex(windowIndex), camera(nullptr), inputController(nullptr), allUpdateables(), initialResources(nullptr), surface(nullptr), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), vertexShaderModule(nullptr), tessellationControlShaderModule(nullptr), tessellationEvaluationShaderModule(nullptr), geometryShaderModule(nullptr), fragmentShaderModule(nullptr), pipelineCache(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), swapchain(nullptr), renderPass(nullptr), pipeline(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr)
+		IUpdateThread(), displayIndex(displayIndex), windowIndex(windowIndex), camera(nullptr), inputController(nullptr), allUpdateables(), initialResources(nullptr), surface(nullptr), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), vertexShaderModule(nullptr), tessellationControlShaderModule(nullptr), tessellationEvaluationShaderModule(nullptr), geometryShaderModule(nullptr), fragmentShaderModule(nullptr), pipelineCache(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), allBuildCommandTasks(), swapchain(nullptr), renderPass(nullptr), pipeline(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr)
 {
 	for (int32_t i = 0; i < VKTS_NUMBER_BUFFERS; i++)
 	{
@@ -133,6 +133,7 @@ VkBool32 Example::buildCmdBuffer(const int32_t usedBuffer)
 
 	vkCmdSetScissor(cmdBuffer[usedBuffer]->getCommandBuffer(), 0, 1, &scissor);
 
+	// TODO: Remove, as secondary command buffers will be placed here.
 	if (scene.get())
 	{
 		scene->bindDrawIndexedRecursive(cmdBuffer[usedBuffer], pipeline);
@@ -233,7 +234,7 @@ VkBool32 Example::updateDescriptorSets()
 	return VK_TRUE;
 }
 
-VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
+VkBool32 Example::buildScene(const vkts::IUpdateThreadContext& updateContext, const vkts::ICommandBuffersSP& cmdBuffer)
 {
 	VkSamplerCreateInfo samplerCreateInfo;
 
@@ -291,6 +292,22 @@ VkBool32 Example::buildScene(const vkts::ICommandBuffersSP& cmdBuffer)
 	}
 
 	vkts::logPrint(VKTS_LOG_INFO, "Example: Number objects: %d", scene->getNumberObjects());
+
+	//
+
+	for (size_t i = 0; i < VKTS_NUMBER_TASKS; i++)
+	{
+		auto currentBuildCommandTask = IBuildCommandTaskSP(new BuildCommandTask(updateContext, scene, (uint32_t)i, VKTS_NUMBER_TASKS));
+
+		if (!currentBuildCommandTask.get())
+		{
+			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not create tasks.");
+
+			return VK_FALSE;
+		}
+
+		allBuildCommandTasks.append(currentBuildCommandTask);
+	}
 
 	return VK_TRUE;
 }
@@ -1021,7 +1038,7 @@ VkBool32 Example::buildResources(const vkts::IUpdateThreadContext& updateContext
 
 	if (!scene.get())
 	{
-		if (!buildScene(updateCmdBuffer))
+		if (!buildScene(updateContext, updateCmdBuffer))
 		{
 			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build scene.");
 
@@ -1496,6 +1513,25 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 			return VK_FALSE;
 		}
 
+		//
+
+		for (size_t i = 0; i < allBuildCommandTasks.size(); i++)
+		{
+			// Reset tasks, that they can be used again.
+			allBuildCommandTasks[i]->resetDone();
+
+			// Send the tasks ...
+			updateContext.sendTask(allBuildCommandTasks[i]);
+		}
+
+		for (size_t i = 0; i < allBuildCommandTasks.size(); i++)
+		{
+			// ... and wait for finished execution.
+			allBuildCommandTasks[i]->waitDone();
+		}
+
+		// TODO: Later remove, as update happens in thread.
+		//		 Instead, gather secondary command buffers and create new primary command buffer.
 		if (scene.get())
 		{
 			scene->updateRecursive(updateContext);
@@ -1610,6 +1646,10 @@ void Example::terminate(const vkts::IUpdateThreadContext& updateContext)
 		if (initialResources->getDevice().get())
 		{
 			terminateResources(updateContext);
+
+			//
+
+			allBuildCommandTasks.clear();
 
 			//
 
