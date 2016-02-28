@@ -191,7 +191,7 @@ void Image::copyImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage
     // Prepare source image for copy.
 
 	imageMemoryBarrier.srcAccessMask = accessMask;
-	imageMemoryBarrier.dstAccessMask = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_ACCESS_TRANSFER_READ_BIT;
+	imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
     imageMemoryBarrier.oldLayout = imageLayout;
     imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 
@@ -202,7 +202,7 @@ void Image::copyImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage
     // Prepare target image for copy.
 
     imageMemoryBarrier.srcAccessMask = targetAccessMask;
-    imageMemoryBarrier.dstAccessMask = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+    imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
     imageMemoryBarrier.oldLayout = targetImageLayout;
     imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 
@@ -216,7 +216,7 @@ void Image::copyImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage
 
     // Revert back.
 
-    imageMemoryBarrier.srcAccessMask = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+    imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
     imageMemoryBarrier.dstAccessMask = targetAccessMask;
 
     imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
@@ -224,7 +224,7 @@ void Image::copyImage(const VkCommandBuffer cmdBuffer, const VkImage targetImage
 
     vkCmdPipelineBarrier(cmdBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1, &imageMemoryBarrier);
 
-	imageMemoryBarrier.srcAccessMask = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_ACCESS_TRANSFER_READ_BIT;
+	imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 	imageMemoryBarrier.dstAccessMask = accessMask;
 
 	imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;

@@ -20,17 +20,17 @@ layout (binding = 1, std140) uniform _u_bufferTransform {
 
 layout (binding = 5) uniform sampler2D u_displacementTexture;
 
-in vec3 v_g_eye[];
-in vec3 v_g_normal[];
-in vec3 v_g_bitangent[];
-in vec3 v_g_tangent[];
-in vec2 v_g_texCoord[];
+layout (location = 0) in vec3 v_g_eye[];
+layout (location = 1) in vec3 v_g_normal[];
+layout (location = 2) in vec3 v_g_bitangent[];
+layout (location = 3) in vec3 v_g_tangent[];
+layout (location = 4) in vec2 v_g_texCoord[];
 
-out vec3 v_f_eye;
-out vec3 v_f_normal;
-out vec3 v_f_bitangent;
-out vec3 v_f_tangent;
-out vec2 v_f_texCoord;
+layout (location = 0) out vec3 v_f_eye;
+layout (location = 1) out vec3 v_f_normal;
+layout (location = 2) out vec3 v_f_bitangent;
+layout (location = 3) out vec3 v_f_tangent;
+layout (location = 4) out vec2 v_f_texCoord;
 
 void main(void)
 {

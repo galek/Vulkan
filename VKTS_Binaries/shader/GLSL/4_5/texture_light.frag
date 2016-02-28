@@ -13,8 +13,8 @@ layout (binding = 8) uniform sampler2D u_diffuseTexture;
 layout (binding = 9) uniform sampler2D u_specularTexture;
 layout (binding = 10) uniform sampler2D u_specularShininessTexture;
 
-in vec3 v_normal;
-in vec2 v_texCoord;
+layout (location = 0) in vec3 v_normal;
+layout (location = 1) in vec2 v_texCoord;
 
 layout (location = 0) out vec4 ob_fragColor;
 

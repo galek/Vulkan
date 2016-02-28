@@ -74,6 +74,10 @@ How to build:
 Changelog:
 ----------
 
+02/28/2016 - Added layout qualifier to all shaders.
+           - Fixed projection matrices, that z goes from 0 to 1.
+           - Removed invalid access flags.
+
 02/24/2016 - Retested for AMD, Intel and NVIDIA GPUs and removed all layer warnings.
            - Fixed task infinite wait in case execution thread was faster.
            - Improved scene class, that only used resources can be bound.

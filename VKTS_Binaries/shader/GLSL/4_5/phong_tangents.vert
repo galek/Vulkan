@@ -16,11 +16,11 @@ layout (location = 2) in vec3 a_bitangent;
 layout (location = 3) in vec3 a_tangent;
 layout (location = 4) in vec2 a_texCoord;
 
-out vec3 v_eye;
-out vec3 v_normal;
-out vec3 v_bitangent;
-out vec3 v_tangent;
-out vec2 v_texCoord;
+layout (location = 0) out vec3 v_eye;
+layout (location = 1) out vec3 v_normal;
+layout (location = 2) out vec3 v_bitangent;
+layout (location = 3) out vec3 v_tangent;
+layout (location = 4) out vec2 v_texCoord;
 
 void main(void)
 {

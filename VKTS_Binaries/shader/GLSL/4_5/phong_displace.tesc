@@ -2,17 +2,17 @@
 
 layout(vertices = 3) out;
 
-in vec3 v_c_eye[];
-in vec3 v_c_normal[];
-in vec3 v_c_bitangent[];
-in vec3 v_c_tangent[];
-in vec2 v_c_texCoord[];
+layout (location = 0) in vec3 v_c_eye[];
+layout (location = 1) in vec3 v_c_normal[];
+layout (location = 2) in vec3 v_c_bitangent[];
+layout (location = 3) in vec3 v_c_tangent[];
+layout (location = 4) in vec2 v_c_texCoord[];
 
-out vec3 v_e_eye[];
-out vec3 v_e_normal[];
-out vec3 v_e_bitangent[];
-out vec3 v_e_tangent[];
-out vec2 v_e_texCoord[];
+layout (location = 0) out vec3 v_e_eye[];
+layout (location = 1) out vec3 v_e_normal[];
+layout (location = 2) out vec3 v_e_bitangent[];
+layout (location = 3) out vec3 v_e_tangent[];
+layout (location = 4) out vec2 v_e_texCoord[];
 
 void main(void)
 {

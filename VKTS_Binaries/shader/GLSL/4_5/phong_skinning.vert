@@ -30,11 +30,11 @@ layout (location = 7) in vec4 a_boneWeight_0;
 layout (location = 8) in vec4 a_boneWeight_1;
 layout (location = 9) in float a_boneCounter;
 
-out vec3 v_eye;
-out vec3 v_normal;
-out vec3 v_bitangent;
-out vec3 v_tangent;
-out vec2 v_texCoord;
+layout (location = 0) out vec3 v_eye;
+layout (location = 1) out vec3 v_normal;
+layout (location = 2) out vec3 v_bitangent;
+layout (location = 3) out vec3 v_tangent;
+layout (location = 4) out vec2 v_texCoord;
 
 void main(void)
 {

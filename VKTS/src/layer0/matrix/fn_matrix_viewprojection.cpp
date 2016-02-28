@@ -29,6 +29,10 @@
 namespace vkts
 {
 
+// Deriving projection matrix:
+// http://www.songho.ca/opengl/gl_projectionmatrix.html
+// http://www.codeguru.com/cpp/misc/misc/graphics/article.php/c10123/Deriving-Projection-Matrices.htm#page-1
+
 glm::mat4 VKTS_APIENTRY orthoMat4(const float left, const float right, const float bottom, const float top, const float nearVal, const float farVal)
 {
     if ((right - left) == 0.0f || (top - bottom) == 0.0f || (farVal - nearVal) == 0.0f)
@@ -49,11 +53,13 @@ glm::mat4 VKTS_APIENTRY orthoMat4(const float left, const float right, const flo
     result[1][3] = 0.0f;
     result[2][0] = 0.0f;
     result[2][1] = 0.0f;
-    result[2][2] = -2.0f / (farVal - nearVal);
+    // z range is [0 1]
+    result[2][2] = -1.0f / (farVal - nearVal);
     result[2][3] = 0.0f;
     result[3][0] = -(right + left) / (right - left);
     result[3][1] = -(top + bottom) / (top - bottom);
-    result[3][2] = -(farVal + nearVal) / (farVal - nearVal);
+    // z range is [0 1]
+    result[3][2] = -nearVal / (farVal - nearVal);
     result[3][3] = 1.0f;
 
     return result;
@@ -79,11 +85,13 @@ glm::mat4 VKTS_APIENTRY frustumMat4(const float left, const float right, const f
     result[1][3] = 0.0f;
     result[2][0] = (right + left) / (right - left);
     result[2][1] = (top + bottom) / (top - bottom);
-    result[2][2] = -(farVal + nearVal) / (farVal - nearVal);
+    // z range is [0 1]
+    result[2][2] = -farVal / (farVal - nearVal);
     result[2][3] = -1.0f;
     result[3][0] = 0.0f;
     result[3][1] = 0.0f;
-    result[3][2] = -(2.0f * farVal * nearVal) / (farVal - nearVal);
+    // z range is [0 1]
+    result[3][2] = -(farVal * nearVal) / (farVal - nearVal);
     result[3][3] = 0.0f;
 
     return result;

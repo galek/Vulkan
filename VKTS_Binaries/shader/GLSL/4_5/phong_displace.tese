@@ -2,17 +2,17 @@
 
 layout(triangles, equal_spacing, ccw) in;
 
-in vec3 v_e_eye[];
-in vec3 v_e_normal[];
-in vec3 v_e_bitangent[];
-in vec3 v_e_tangent[];
-in vec2 v_e_texCoord[];
+layout (location = 0) in vec3 v_e_eye[];
+layout (location = 1) in vec3 v_e_normal[];
+layout (location = 2) in vec3 v_e_bitangent[];
+layout (location = 3) in vec3 v_e_tangent[];
+layout (location = 4) in vec2 v_e_texCoord[];
 
-out vec3 v_g_eye;
-out vec3 v_g_normal;
-out vec3 v_g_bitangent;
-out vec3 v_g_tangent;
-out vec2 v_g_texCoord;
+layout (location = 0) out vec3 v_g_eye;
+layout (location = 1) out vec3 v_g_normal;
+layout (location = 2) out vec3 v_g_bitangent;
+layout (location = 3) out vec3 v_g_tangent;
+layout (location = 4) out vec2 v_g_texCoord;
 
 vec2 interpolateVec2(in vec2 v0, in vec2 v1, in vec2 v2)
 {

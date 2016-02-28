@@ -386,7 +386,7 @@ VkBool32 Example::buildTexture(const vkts::ICommandBuffersSP& cmdBuffer, vkts::I
 
 		// Prepare source image layout for copy.
 
-		imageMemoryBarrier.dstAccessMask = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_ACCESS_TRANSFER_READ_BIT;
+		imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 		imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
 		imageMemoryBarrier.image = stageImage->getImage();
 
@@ -395,7 +395,7 @@ VkBool32 Example::buildTexture(const vkts::ICommandBuffersSP& cmdBuffer, vkts::I
 		// Prepare target image layout for copy.
 
 		imageMemoryBarrier.srcAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
-		imageMemoryBarrier.dstAccessMask = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+		imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 		imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 		imageMemoryBarrier.image = image->getImage();
@@ -417,7 +417,7 @@ VkBool32 Example::buildTexture(const vkts::ICommandBuffersSP& cmdBuffer, vkts::I
 		vkCmdCopyImage(cmdBuffer->getCommandBuffer(), stageImage->getImage(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, image->getImage(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &imageCopy);
 
 		// Switch back to original layout.
-		imageMemoryBarrier.srcAccessMask = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_ACCESS_TRANSFER_WRITE_BIT;
+		imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 		imageMemoryBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT | VK_ACCESS_INPUT_ATTACHMENT_READ_BIT;
 		imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 		imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
