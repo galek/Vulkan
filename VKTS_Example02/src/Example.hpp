@@ -49,6 +49,8 @@ private:
 
 	const int32_t windowIndex;
 
+	glm::uvec2 windowDimension;
+
 	vkts::IInstanceSP instance;
 
 	vkts::IPhysicalDeviceSP physicalDevice;

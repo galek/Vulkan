@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const int32_t displayIndex, const int32_t windowIndex) :
-		IUpdateThread(), displayIndex(displayIndex), windowIndex(windowIndex), instance(VK_NULL_HANDLE), physicalDevice(VK_NULL_HANDLE), device(VK_NULL_HANDLE), surface(nullptr) , queueFamilyIndex(0), queue(VK_NULL_HANDLE), commandPool(VK_NULL_HANDLE), imageAcquiredSemaphore(VK_NULL_HANDLE), renderingCompleteSemaphore(VK_NULL_HANDLE), swapchain(VK_NULL_HANDLE), renderPass(VK_NULL_HANDLE)
+		IUpdateThread(), displayIndex(displayIndex), windowIndex(windowIndex), windowDimension(0, 0), instance(VK_NULL_HANDLE), physicalDevice(VK_NULL_HANDLE), device(VK_NULL_HANDLE), surface(nullptr) , queueFamilyIndex(0), queue(VK_NULL_HANDLE), commandPool(VK_NULL_HANDLE), imageAcquiredSemaphore(VK_NULL_HANDLE), renderingCompleteSemaphore(VK_NULL_HANDLE), swapchain(VK_NULL_HANDLE), renderPass(VK_NULL_HANDLE)
 {
 	memset(&swapchainCreateInfo, 0, sizeof(VkSwapchainCreateInfoKHR));
 
@@ -742,6 +742,8 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 		return VK_FALSE;
 	}
 
+	windowDimension = updateContext.getWindowDimension(windowIndex);
+
 	//
 
 	VkResult result;
@@ -1014,13 +1016,25 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 {
 
-	VkResult result;
+	VkResult result = VK_SUCCESS;
+
+	//
+
+	if (windowDimension != updateContext.getWindowDimension(windowIndex))
+	{
+		windowDimension = updateContext.getWindowDimension(windowIndex);
+
+		result = VK_ERROR_OUT_OF_DATE_KHR;
+	}
 
 	//
 
 	uint32_t currentBuffer;
 
-	result = vktsAcquireNextImageKHR(device, swapchain, UINT64_MAX, imageAcquiredSemaphore, VK_NULL_HANDLE, &currentBuffer);
+	if (result == VK_SUCCESS)
+	{
+		result = vktsAcquireNextImageKHR(device, swapchain, UINT64_MAX, imageAcquiredSemaphore, VK_NULL_HANDLE, &currentBuffer);
+	}
 
 	if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 	{
@@ -1064,22 +1078,36 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 		result = vktsQueuePresentKHR(queue, &presentInfo);
 
-		if (result != VK_SUCCESS)
+		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not present queue.");
+			result = vkQueueWaitIdle(queue);
 
-			return VK_FALSE;
+			if (result != VK_SUCCESS)
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for idle queue.");
+
+				return VK_FALSE;
+			}
 		}
-
-		//
-
-		result = vkQueueWaitIdle(queue);
-
-		if (result != VK_SUCCESS)
+		else
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for idle queue.");
+			if (result == VK_ERROR_OUT_OF_DATE_KHR)
+			{
+				terminateResources(updateContext);
 
-			return VK_FALSE;
+				if (!buildResources(updateContext))
+				{
+					vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build resources.");
+
+					return VK_FALSE;
+				}
+			}
+			else
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not present queue.");
+
+				return VK_FALSE;
+			}
 		}
 	}
 	else

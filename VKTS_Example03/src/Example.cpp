@@ -1421,22 +1421,36 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
         result = swapchain->queuePresent(queue->getQueue(), 1, &waitSemaphores, 1, &swapchains, &currentBuffer, nullptr);
 
-		if (result != VK_SUCCESS)
+		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not present queue.");
+			result = queue->waitIdle();
 
-			return VK_FALSE;
+			if (result != VK_SUCCESS)
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for idle queue.");
+
+				return VK_FALSE;
+			}
 		}
-
-		//
-
-		result = queue->waitIdle();
-
-		if (result != VK_SUCCESS)
+		else
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for idle queue.");
+			if (result == VK_ERROR_OUT_OF_DATE_KHR)
+			{
+				terminateResources(updateContext);
 
-			return VK_FALSE;
+				if (!buildResources(updateContext))
+				{
+					vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build resources.");
+
+					return VK_FALSE;
+				}
+			}
+			else
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not present queue.");
+
+				return VK_FALSE;
+			}
 		}
 	}
 	else

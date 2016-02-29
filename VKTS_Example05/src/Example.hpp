@@ -53,6 +53,8 @@ private:
 
 	const int32_t windowIndex;
 
+	glm::uvec2 windowDimension;
+
 	vkts::IInitialResourcesSP initialResources;
 
 	vkts::ISurfaceSP surface;

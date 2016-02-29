@@ -27,7 +27,7 @@
 #include "Example.hpp"
 
 Example::Example(const int32_t displayIndex, const int32_t windowIndex) :
-		IUpdateThread(), displayIndex(displayIndex), windowIndex(windowIndex), camera(nullptr), inputController(nullptr), allUpdateables(), initialResources(nullptr), surface(nullptr), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), vertexShaderModule(nullptr), tessellationControlShaderModule(nullptr), tessellationEvaluationShaderModule(nullptr), geometryShaderModule(nullptr), fragmentShaderModule(nullptr), pipelineCache(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), allBuildCommandTasks(), swapchain(nullptr), renderPass(nullptr), pipeline(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr)
+		IUpdateThread(), displayIndex(displayIndex), windowIndex(windowIndex), windowDimension(0, 0), camera(nullptr), inputController(nullptr), allUpdateables(), initialResources(nullptr), surface(nullptr), commandPool(nullptr), imageAcquiredSemaphore(nullptr), renderingCompleteSemaphore(nullptr), descriptorSetLayout(nullptr), vertexViewProjectionUniformBuffer(nullptr), fragmentUniformBuffer(nullptr), vertexShaderModule(nullptr), tessellationControlShaderModule(nullptr), tessellationEvaluationShaderModule(nullptr), geometryShaderModule(nullptr), fragmentShaderModule(nullptr), pipelineCache(nullptr), pipelineLayout(nullptr), sceneContext(nullptr), scene(nullptr), allBuildCommandTasks(), swapchain(nullptr), renderPass(nullptr), pipeline(nullptr), depthTexture(nullptr), depthStencilImageView(nullptr)
 {
 	for (int32_t i = 0; i < VKTS_NUMBER_BUFFERS; i++)
 	{
@@ -1196,6 +1196,8 @@ VkBool32 Example::init(const vkts::IUpdateThreadContext& updateContext)
 		return VK_FALSE;
 	}
 
+	windowDimension = updateContext.getWindowDimension(windowIndex);
+
 	//
 
 	camera = vkts::cameraCreate(glm::vec4(0.0f, 4.0f, 10.0f, 1.0f), glm::vec4(0.0f, 2.0f, 0.0f, 1.0f));
@@ -1471,13 +1473,25 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
 	//
 
-	VkResult result;
+	VkResult result = VK_SUCCESS;
+
+	//
+
+	if (windowDimension != updateContext.getWindowDimension(windowIndex))
+	{
+		windowDimension = updateContext.getWindowDimension(windowIndex);
+
+		result = VK_ERROR_OUT_OF_DATE_KHR;
+	}
 
 	//
 
 	uint32_t currentBuffer;
 
-    result = swapchain->acquireNextImage(UINT64_MAX, imageAcquiredSemaphore->getSemaphore(), VK_NULL_HANDLE, currentBuffer);
+	if (result == VK_SUCCESS)
+	{
+		result = swapchain->acquireNextImage(UINT64_MAX, imageAcquiredSemaphore->getSemaphore(), VK_NULL_HANDLE, currentBuffer);
+	}
 
 	if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 	{
@@ -1574,22 +1588,36 @@ VkBool32 Example::update(const vkts::IUpdateThreadContext& updateContext)
 
         result = swapchain->queuePresent(initialResources->getQueue()->getQueue(), 1, &waitSemaphores, 1, &swapchains, &currentBuffer, nullptr);
 
-		if (result != VK_SUCCESS)
+		if (result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR)
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not present queue.");
+			result = initialResources->getQueue()->waitIdle();
 
-			return VK_FALSE;
+			if (result != VK_SUCCESS)
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for idle queue.");
+
+				return VK_FALSE;
+			}
 		}
-
-		//
-
-		result = initialResources->getQueue()->waitIdle();
-
-		if (result != VK_SUCCESS)
+		else
 		{
-			vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not wait for idle queue.");
+			if (result == VK_ERROR_OUT_OF_DATE_KHR)
+			{
+				terminateResources(updateContext);
 
-			return VK_FALSE;
+				if (!buildResources(updateContext))
+				{
+					vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not build resources.");
+
+					return VK_FALSE;
+				}
+			}
+			else
+			{
+				vkts::logPrint(VKTS_LOG_ERROR, "Example: Could not present queue.");
+
+				return VK_FALSE;
+			}
 		}
 	}
 	else
