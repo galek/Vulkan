@@ -36,7 +36,7 @@ void main(void)
 {
     for(int i = 0; i < gl_in.length(); ++i)
     {
-        float displace = texture(u_displacementTexture, v_g_texCoord[i]).r * VKTS_DISPLACE_STRENGTH - VKTS_DISPLACE_MIDLEVEL;
+        float displace = textureLod(u_displacementTexture, v_g_texCoord[i], 0.0).r * VKTS_DISPLACE_STRENGTH - VKTS_DISPLACE_MIDLEVEL;
         
         vec4 displaceVector = vec4(0.0, displace, 0.0, 0.0);
     
