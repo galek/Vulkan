@@ -13,7 +13,7 @@ Following requirements do depend on the platform:
 ![Android](images/android_logo.png) Android:
 ---
 
-- Only 32bit Intel systems are supported.
+- Only 32bit Intel and ARM systems are supported.
 - Building: ndk-build
     - Windows batch files included.
     - [Android NDK](http://developer.android.com/ndk/index.html) required.  
@@ -92,8 +92,8 @@ Using Android NDK:
 
 The assets are not packaged in the apk file. Instead they are located in the `/sdcard/Download/VKTS_Binaries`
 folder on the device.
-The scripts `android_copy.bat` and `android_copy.sh` located in [VKTS_Binaries](VKTS_Binaries/README.md) do
-create the directory and copies all the files from the host system to the device.
+The scripts `android_copy.bat` and `android_copy.sh` located in [VKTS_Binaries](VKTS_Binaries/README.md)
+executed from the host system do create the directory and copies all the files from the host system to the device.
 
 
 The following command creates the Android project:
